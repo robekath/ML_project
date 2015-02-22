@@ -2,3 +2,13 @@ This project is for use with Johns Hopkins Bloomberg School of Public Health
  course for Practical Machine Learning.
 
 Course directors: Jeff Leek, PhD, Roger D. Peng, PhD, Brian Caffo, PhD
+
+The goal of this project is to predict the manner in which 6 participants
+did the exercise. Each participant did 10 barbell lifts, 5 correctly 
+and 5 incorrectly. The goal is to use machine learning methods to predict
+the form (either correct or incorrect).
+
+Data source
+
+1. 	Velloso E, Bulling A, Gellersen H, Ugulino W, Fuks H. Qualitative Activity Recognition of Weight Lifting Exercises. In: Proceedings of the 4th Augmented Human International Conference. AH ’13. New York, NY, USA: ACM; 2013:116-123. doi:10.1145/2459236.2459256.
+
