@@ -1,0 +1,147 @@
+Practical Machine Learning - Project
+========================================================
+ -Katherine Roberts
+
+## Project Details - Report
+
+Using the data and code described here, I trained a model on 60% of the training dataset and then used the model to predict on the remaining 40%. Once adjusted appropriately, the final model was then used to predict the outcome of a test dataset containing 20 values.
+
+Variables (columns) containing missing values were removed prior to training the model. The data set used contained complete cases. 406 observations and 50 variables remained in the training set. The data were then partitioned into a 60/40 split for training and test sets. Using only the 60% training set, all varaibles were assessed for zero variability. All indicated some amount of variability that could make a useful predictor. Random forest method was used to train the set to model our outcome, class. Class ('classe') is a categorical variable containing values "A", "B", "C", "D", "E". Details on variables are provided in the background section.
+
+The results indicate that the expected/average accuracy for a properly cross-validated experiment should be 0.65. The reported OOB estimate of error rate is 30.89%.The error rates per class are here: A) 0.1818182, B) 0.5208333, C) 0.2142857, D) 0.3333333, and E) 0.3333333.
+
+This prediction model was then used on the testing (validation) set. Accuracy was 75%.
+
+
+## Background
+#### Project
+Using devices such as Jawbone Up, Nike FuelBand, and Fitbit it is now possible to collect a large amount of data about personal activity relatively inexpensively. These type of devices are part of the quantified self movement - a group of enthusiasts who take measurements about themselves regularly to improve their health, to find patterns in their behavior, or because they are tech geeks (yay!). One thing that people regularly do is quantify how much of a particular activity they do, but they rarely quantify how well they do it. In this project, our goal was to use data from accelerometers on the belt, forearm, arm, and dumbell of 6 participants. They were asked to perform barbell lifts correctly and incorrectly in 5 different ways. More information is available from the website here: http://groupware.les.inf.puc-rio.br/har (see the section on the Weight Lifting Exercise Dataset). 
+
+#### Specifics from the source paper
+Participants were asked to perform one set of 10 repetitions of the Unilateral Dumbbell Biceps Curl in five different fashions: exactly according to the specification (Class A), throwing the elbows to the front (Class B), lifting the dumbbell only halfway (Class C), lowering the dumbbell only halfway (Class D) and throwing the hips to the front (Class E). Class A corresponds to the specified execution of the exercise, while the other 4 classes correspond to common mistakes.[1]
+
+The exercises were performed by six male participants aged between 20-28 years, with little weight lifting experience.[1]
+
+For feature extraction we used a sliding window approach with different lengths from 0.5 second to 2.5 seconds, with 0.5 second overlap. In each step of the sliding window approach we calculated features on the Euler angles (roll, pitch and yaw), as well as the raw accelerometer, gyroscope and magnetometer readings.[1]
+
+### Source Reference:
+
+1.  Velloso E, Bulling A, Gellersen H, Ugulino W, Fuks H. Qualitative Activity Recognition of Weight Lifting Exercises. In: Proceedings of the 4th Augmented Human International Conference. AH '13. New York, NY, USA: ACM; 2013:116-123. doi:10.1145/2459236.2459256.
+
+
+The technology used to generate the dataset. R Project version and CPU and OS:
+```{r session, cache=T, echo=F,message=T, results='markup', eval=T}
+R.version$version.string
+R.version$system
+```
+
+
+Libraries used for this data:
+```{r libraries, cache=T, echo=T,message=F, results='hide', eval=F}
+library(ggplot2); library(caret)
+```
+
+
+### Load Data
+Set appropriate directory paths - set session working dir to your prog (or appropriate) directory
+```{r wd, cache=T, echo=F,message=T, results='markup', eval=T}
+setwd("C:/Users/Katie/Desktop/MachineLearning/Project/ML_project/prog")
+IN_DATA_DIR <- "..\\input"
+inDataFile <- function(filename) {
+  return (paste(c(IN_DATA_DIR,FILE_SEP,filename), collapse=""))
+}
+csvtraining = read.csv(paste(c(IN_DATA_DIR,"/pml-training.csv"),collapse=""), header=TRUE)
+
+```
+Load the csv 'pml-training' data we will use to build our prediction model. Subset data into useful model set of outcome, user_name, and raw values. Eliminate NA columns for complete case data.
+```{r subset, cache=T, echo=T,message=T, results='markup', eval=T}
+#subset data into useful model set of outcome, user_name, and raw values
+newdata <- csvtraining[which(csvtraining$new_window=='yes'), ]
+na.strings=c("","NA","#DIV/0!")
+newdata[newdata == "#DIV/0!"] <- NA
+newdatanoNA <- newdata[,!sapply(newdata,function(x) any(is.na(x)))]
+newdatacomp = newdatanoNA[complete.cases(newdatanoNA),]
+
+subbed <- subset(newdatacomp, select = c(2,8:10,28:39,51:59,69:71,89:100,118:127) )
+```
+
+
+### Create Partition for Training and Test Sets
+Set seed and create a data partition using the caret package.
+```{r partition, cache=T, echo=T,message=T, results='markup', eval=T}
+set.seed(16165)
+library(ggplot2); library(caret)
+#create partition for training and testing (the 'test' data we will apply the predictions to will be our 'validation' set)
+inTrain <- createDataPartition(y=subbed$classe,
+                               p=0.60, list=FALSE)
+#60% to train, 40% to test. 
+training <- subbed[inTrain,]
+testing <- subbed[-inTrain,]
+dim(training); dim(testing)
+```
+
+
+### Assess Data Variability
+Use the nearZeroVar to identify variables with very little variabliity and therefore will likely not make good predictors.
+```{r nsv, cache=T, echo=T,message=T, results='markup', eval=T}
+library(caret)
+nsv <- nearZeroVar(training, saveMetrics=TRUE)
+nsv
+```
+Note: all varaibles contain some amount of variability that could make a useful predictor
+
+
+
+### Train Model on 60% Training Set
+Using the train command from the caret package, we are trying to predit "classe" from the other variables. We will use the random forest method:
+```{r trainmod, cache=T, echo=T,message=T, results='markup', eval=T}
+modelFit <- train(classe ~ ., data=training, method="rf", prox=TRUE)
+#look at the model we fit
+print(modelFit)
+modelFit$finalModel
+```
+
+
+### Predict Class Outcome using Final Model on 40% Training Set
+First, on the training test set (not our validation set)
+```{r}
+predictions <- predict(modelFit, newdata=testing) #gives predictions that correspond to the responses
+```
+
+
+compare predictions to our outcomes
+```{r}
+confusionMatrix(predictions,testing$classe)
+```
+
+
+Fit our final model to a plot showing the error by random forest trees
+```{r fig.width=10, fig.height=5}
+finMod <- modelFit$finalModel
+plot(finMod, main="Final Model")
+```
+
+
+Create table to see how many predictions we missed
+```{r fig.width=10, fig.height=5}
+testing$predRight <- predictions == testing$classe #set a variable to see if we got the prediction right
+table(predictions, testing$classe) #see that we missed several
+```
+
+Plot to see which predictions we missed by Class and which predictions we missed by user name.
+```{r fig.width=10, fig.height=5}
+library(ggplot2)
+qplot(classe, colour=predRight, data=testing, main="Class Prediction Correct")
+#the points that were misclassified were mostly in classe e
+qplot(user_name, colour=predRight, data=testing, main="User Prediction Correct")
+```
+Missed classifying in all classes and all users. Mostly for Eurico..
+
+
+
+
+
+## Discussion and Notes
+******************************
+My knowledge is limited in this area. Better methods and approaches to the training set are available. This document contains the results of a simplistic approach simply subsetting the data and applying the random forest method. Better accuracy, I'm sure, can be acheived using pre-processing and/or other methods suitable for this data.
+
