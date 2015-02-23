@@ -264,9 +264,42 @@ First, on the training test set (not our validation set)
 predictions <- predict(modelFit, newdata = testing)  #gives predictions that correspond to the responses
 ```
 
+```
+## Loading required package: randomForest
+```
+
+```
+## Warning: package 'randomForest' was built under R version 3.1.2
+```
+
+```
+## randomForest 4.6-10
+## Type rfNews() to see new features/changes/bug fixes.
+```
+
 
 
 compare predictions to our outcomes
+
+```r
+library(ggplot2)
+```
+
+```
+## Warning: package 'ggplot2' was built under R version 3.1.2
+```
+
+```r
+library(caret)
+```
+
+```
+## Warning: package 'caret' was built under R version 3.1.2
+```
+
+```
+## Loading required package: lattice
+```
 
 ```r
 confusionMatrix(predictions, testing$classe)
