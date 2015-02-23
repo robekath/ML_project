@@ -416,34 +416,11 @@ print(modelFit)
 <pre><code class="r">predictions &lt;- predict(modelFit, newdata = testing)  #gives predictions that correspond to the responses
 </code></pre>
 
-<pre><code>## Loading required package: randomForest
-</code></pre>
-
-<pre><code>## Warning: package &#39;randomForest&#39; was built under R version 3.1.2
-</code></pre>
-
-<pre><code>## randomForest 4.6-10
-## Type rfNews() to see new features/changes/bug fixes.
-</code></pre>
-
 <p>compare predictions to our outcomes</p>
 
 <pre><code class="r">library(ggplot2)
-</code></pre>
-
-<pre><code>## Warning: package &#39;ggplot2&#39; was built under R version 3.1.2
-</code></pre>
-
-<pre><code class="r">library(caret)
-</code></pre>
-
-<pre><code>## Warning: package &#39;caret&#39; was built under R version 3.1.2
-</code></pre>
-
-<pre><code>## Loading required package: lattice
-</code></pre>
-
-<pre><code class="r">confusionMatrix(predictions, testing$classe)
+library(caret)
+confusionMatrix(predictions, testing$classe)
 </code></pre>
 
 <pre><code>## Confusion Matrix and Statistics

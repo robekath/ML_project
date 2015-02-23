@@ -44,7 +44,7 @@ library(ggplot2); library(caret)
 
 ### Load Data
 Set appropriate directory paths - set session working dir to your prog (or appropriate) directory
-```{r wd, cache=T, echo=F,message=T, results='markup', eval=T}
+```{r wd, cache=T, echo=F,message=F, results='hide', eval=F}
 setwd("C:/Users/Katie/Desktop/MachineLearning/Project/ML_project/prog")
 IN_DATA_DIR <- "..\\input"
 inDataFile <- function(filename) {
